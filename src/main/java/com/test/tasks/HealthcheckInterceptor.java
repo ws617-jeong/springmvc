@@ -10,9 +10,11 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,11 +22,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.test.tasks.HealthcheckController.ParameterName;
 import com.test.tasks.HealthcheckController.ParameterValue;
 
+@Component
 public class HealthcheckInterceptor implements HandlerInterceptor {
 
 	private EnumSet<HttpMethod> allowedHttpMethods = EnumSet.of(HttpMethod.GET);
 	
-	private ObjectMapper mapper = new ObjectMapper();
+	@Autowired
+	private ObjectMapper jsonMapper;
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -35,7 +39,7 @@ public class HealthcheckInterceptor implements HandlerInterceptor {
 		HttpMethod httpMethod = Optional.of(HttpMethod.resolve(request.getMethod())).orElse(HttpMethod.HEAD);
 		if(!allowedHttpMethods.contains(httpMethod)) {
 			jsonMap.put("status", "Method Not Allowed");
-			String message = mapper.writeValueAsString(jsonMap);
+			String message = jsonMapper.writeValueAsString(jsonMap);
 			response.sendError(HttpStatus.METHOD_NOT_ALLOWED.value(), message);
 			return false;
 		}
@@ -50,7 +54,7 @@ public class HealthcheckInterceptor implements HandlerInterceptor {
 		
 		if(isInvalidParameterName || isInValidParameterValue) {
 			jsonMap.put("status", "Bad Request");
-			String message = mapper.writeValueAsString(jsonMap);
+			String message = jsonMapper.writeValueAsString(jsonMap);
 			response.sendError(HttpStatus.BAD_REQUEST.value(), message);
 			return false;
 		}
