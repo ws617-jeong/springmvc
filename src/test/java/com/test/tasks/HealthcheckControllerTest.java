@@ -34,7 +34,6 @@ public class HealthcheckControllerTest {
 	
 	@Before
 	public void setup() {
-//		this.mockMvc = MockMvcBuilders.standaloneSetup(new HealthcheckController()).build();
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context).build();
 	}
 	
